@@ -5118,28 +5118,53 @@
 
 (deftest next-gold
    ;; NEXT Gold
-   (do-game
-     (new-game
-       {:corp   {:hand ["NEXT Gold" "NEXT Bronze"] :credits 16}
-        :runner {:hand ["Ankusa" "Pelangi" "Algernon" "Bankroll" "Alias", "RNG Key"] :credits 16}})
-     (play-from-hand state :corp "NEXT Gold" "HQ")
-     (play-from-hand state :corp "NEXT Bronze" "Archives")
-     (take-credits state :corp)
-     (play-from-hand state :runner "Algernon")
-     (play-from-hand state :runner "Bankroll")
-     (play-from-hand state :runner "Alias")
-     (let [next-gold (get-ice state :hq 0)
-           next-bronze (get-ice state :archives 0)
-           algernon  (get-program state 0)
-           bankroll  (get-program state 1)]
-          (run-on state :hq)
-          (rez state :corp next-bronze)
-          (rez state :corp next-gold)
-          (run-continue state)
-          (card-subroutine state :corp next-gold 0)
-          (is (= 1 (count (:hand (get-runner)))))
-          (card-subroutine state :corp next-gold 1)
-          (click-card state :corp algernon)
-          (click-card state :corp bankroll)
-          (is (= "Algernon" (:title (first (take-last 2 (:discard (get-runner)))))))
-          (is (= "Bankroll" (:title (last (:discard (get-runner))))))
+   (testing "2 NEXT rezzed ice must do 2 net damage and trash 2 programs"
+     (do-game
+       (new-game
+         {:corp   {:hand ["NEXT Gold" "NEXT Bronze"] :credits 16}
+          :runner {:hand ["Ankusa" "Pelangi" "Algernon" "Bankroll" "Alias"] :credits 16}})
+       (play-from-hand state :corp "NEXT Gold" "HQ")
+       (play-from-hand state :corp "NEXT Bronze" "Archives")
+       (take-credits state :corp)
+       (play-from-hand state :runner "Algernon")
+       (play-from-hand state :runner "Bankroll")
+       (let [next-gold (get-ice state :hq 0)
+             next-bronze (get-ice state :archives 0)
+             algernon  (get-program state 0)
+             bankroll  (get-program state 1)]
+            (run-on state :hq)
+            (rez state :corp next-bronze)
+            (rez state :corp next-gold)
+            (run-continue state)
+            (card-subroutine state :corp next-gold 0)
+            (is (= 1 (count (:hand (get-runner)))))
+            (card-subroutine state :corp next-gold 1)
+            (click-card state :corp algernon)
+            (click-card state :corp bankroll)
+            (is (= "Algernon" (:title (first (take-last 2 (:discard (get-runner)))))))
+            (is (= "Bankroll" (:title (last (:discard (get-runner)))))))))
+   (testing "2 NEXT rezzed ice must do 2 net damage and trash 1 program if only 1 is available"
+      (do-game
+        (new-game
+          {:corp   {:hand ["NEXT Gold" "NEXT Bronze"] :credits 16}
+           :runner {:hand ["Ankusa" "Daily Tasks" "Algernon" "Alias"] :credits 16}})
+        (play-from-hand state :corp "NEXT Gold" "HQ")
+        (play-from-hand state :corp "NEXT Bronze" "Archives")
+        (take-credits state :corp)
+        (play-from-hand state :runner "Algernon")
+        (let [next-gold (get-ice state :hq 0)
+              next-bronze (get-ice state :archives 0)
+              algernon  (get-program state 0)]
+             (run-on state :hq)
+             (rez state :corp next-bronze)
+             (rez state :corp next-gold)
+             (run-continue state)
+             (card-subroutine state :corp next-gold 0)
+             (is (= 1 (count (:hand (get-runner)))))
+             (card-subroutine state :corp next-gold 1)
+             (click-card state :corp algernon)
+             (is (= "Algernon" (:title (last (:discard (get-runner))))))
+             (is (= 3 (count (:discard (get-runner)))))
+             (is (= 1 (count (:hand (get-runner)))))
+             (is (every? (fn [x] (= (:type x) "Program")) (take-last 2 (:discard (get-runner)))))
+             (run-continue state)))))
