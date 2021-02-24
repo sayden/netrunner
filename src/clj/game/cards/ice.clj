@@ -2344,10 +2344,21 @@
                   :effect (effect (trash eid target {:cause :subroutine}))}]})
 
 (defcard "NEXT Gold"
-  {:subroutines [{:label "Do 1 net damage for each rezzed NEXT ice"
-                  :msg (msg "do " (next-ice-count corp) " net damage")
-                  :effect (effect (damage eid :net (next-ice-count corp) {:card card}))}
-                 trash-program-sub]})
+   {:subroutines [{:label  "Do 1 net damage for each rezzed NEXT ice"
+                   :msg    (msg "do " (next-ice-count corp) " net damage")
+                   :effect (effect (damage eid :net (next-ice-count corp) {:card card}))}
+                  {:prompt "Choose which programs to trash"
+                   :label "Trash 1 program for each rezzed NEXT ice"
+                   :async true
+                   :choices {
+                             :card #(and (active? %) (program? %))
+                             :all true
+                             :max (req (min (count (filter
+                                                     #(and (active? %) (program? %))
+                                                     (all-installed state :runner)))
+                                      (next-ice-count corp)))}
+                   :msg (msg "trash " (count targets) "programs (" (string/join ", " (map :title targets)) ")")
+                   :effect (effect (trash-cards :runner eid targets))}]})
 
 (defcard "NEXT Opal"
   (let [sub {:label "Install a card from HQ, paying all costs"
