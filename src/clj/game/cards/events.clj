@@ -245,7 +245,8 @@
                card nil))})
 
 (defcard "Brute-Force-Hack"
-  {:req (req (some #(and (ice? %)
+  {:additional-cost [:click 1]
+   :req (req (some #(and (ice? %)
                          (rezzed? %)
                          (can-pay? state side eid card nil
                                    [:credit (rez-cost state side %)]))

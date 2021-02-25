@@ -626,11 +626,13 @@
           tb (get-ice state :hq 1)]
       (rez state :corp iw)
       (rez state :corp tb)
-      (play-from-hand state :runner "Brute-Force-Hack")
-      (click-prompt state :runner "1")
-      (click-card state :runner "Tollbooth")
-      (is (rezzed? (refresh tb)) "Runner doesn't have enough money to derez Tollbooth")
-      (click-card state :runner iw)
+      (let [clicks (:click (get-runner))]
+        (play-from-hand state :runner "Brute-Force-Hack")
+        (click-prompt state :runner "1")
+        (click-card state :runner "Tollbooth")
+        (is (rezzed? (refresh tb)) "Runner doesn't have enough money to derez Tollbooth")
+        (click-card state :runner iw)
+        (is (= (- clicks 2) (:click (get-runner)))))
       (is (not (rezzed? (refresh iw))) "Runner can derez Ice Wall")
       (play-from-hand state :runner "Xanadu")
       (core/gain state :runner :credit 7)
