@@ -4438,7 +4438,7 @@
 (deftest restoring-face
   (do-game
     (new-game {:corp {:bad-pub 6
-                      :credit 15
+                      :credit  15
                       :hand    [(qty "Restoring Face" 3) "Akitaro Watanabe" "Anson Rose" "Turtlebacks" "PAD Campaign"]}})
     (play-from-hand state :corp "Akitaro Watanabe" "New remote")
     (play-from-hand state :corp "Anson Rose" "New remote")
@@ -4456,5 +4456,15 @@
     (take-credits state :runner)
     (play-from-hand state :corp "Restoring Face")
     (click-card state :corp (get-content state :remote1 0))
-    (is (zero? (:base (:bad-publicity (get-corp)))) "2 BP less for Trashing Akitaro Watanabe (SysOps). 0 BP")
-    ))
+    (is (zero? (:base (:bad-publicity (get-corp)))) "2 BP less for Trashing Akitaro Watanabe (SysOps). 0 BP")))
+
+(deftest restructure
+  (do-game
+    (new-game {:corp {:credits 7
+                      :hand    [(qty "Restructure" 2)]}})
+    (play-from-hand state :corp "Restructure")
+    (is (= 7 (:credit (get-corp))) "Not enough credits")
+    (take-credits state :corp)
+    (take-credits state :runner)
+    (play-from-hand state :corp "Restructure")
+    (is (= 15 (:credit (get-corp))))))
