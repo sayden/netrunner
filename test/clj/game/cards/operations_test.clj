@@ -4405,3 +4405,17 @@
       (is (= 2 (:click (get-corp))) "Corp spent 2 clicks to play Reclamation Order")
       (is (= 4 (count (:discard (get-corp)))) "2 cards corresponding to PAD Campaign were taken from Archives")
       (is (= 1 (pads-in-zone-fn :discard)) "One PAD left in Archives"))))
+
+(deftest recruiting-trip
+  (do-game
+    (new-game {:corp {:hand ["Recruiting Trip"]
+                      :deck ["PAD Campaign" "Akitaro Watanabe" (qty "Mason Bellamy" 2) "The Twins"]}})
+    (play-from-hand state :corp "Recruiting Trip")
+    (is (= 0 (count (:hand (get-corp)))))
+    (click-prompt state :corp "2")
+    (is (every? true? (map #(= (has-subtype? % "Sysops")) (:choices (get-prompt state :corp)))))
+    (click-prompt state :corp "Akitaro Watanabe")
+    (click-prompt state :corp "Mason Bellamy")
+    (is (= 2 (count (:hand (get-corp)))))
+    (is (= 1 (count (filter #(= "Akitaro Watanabe" (:title %)) (:hand (get-corp))))))
+    (is (= 1 (count (filter #(= "Mason Bellamy" (:title %)) (:hand (get-corp))))))))
