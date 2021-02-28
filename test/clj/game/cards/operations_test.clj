@@ -4419,3 +4419,19 @@
     (is (= 2 (count (:hand (get-corp)))))
     (is (= 1 (count (filter #(= "Akitaro Watanabe" (:title %)) (:hand (get-corp))))))
     (is (= 1 (count (filter #(= "Mason Bellamy" (:title %)) (:hand (get-corp))))))))
+
+(deftest replanting
+  (do-game
+    (new-game {:corp {:hand ["Snare!" "Replanting" "Enigma" "Ice Wall"]}})
+    (play-from-hand state :corp "Snare!" "New remote")
+    (play-from-hand state :corp "Replanting")
+    (click-card state :corp (get-content state :remote1 0))
+    (click-card state :corp "Enigma")
+    (click-prompt state :corp "HQ")
+    (click-card state :corp "Ice Wall")
+    (click-prompt state :corp "HQ")
+    (is (= 4 (:credit (get-corp))) "Install costs must be free, only 1c spent in Replanting")
+    (is (= 2 (count (get-ice state :hq))) "2 ice installed on HQ")
+    (is (= "Enigma" (:title (get-ice state :hq 0))) "First installed ice is Enigma")
+    (is (= "Ice Wall" (:title (get-ice state :hq 1))) "Second installed ice is Ice Wall")))
+
