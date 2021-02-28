@@ -4390,3 +4390,18 @@
                       :bad-pub 3}})
     (play-from-hand state :corp "Witness Tampering")
     (is (= 1 (count-bad-pub state)) "Corp should lose 2 bad pub")))
+
+(deftest reclamation-order
+  (do-game
+    (new-game {:corp {:deck    [(qty "Hedge Fund" 5)]
+                      :hand    ["Reclamation Order"]
+                      :discard [(qty "PAD Campaign" 3) (qty "Enigma" 2)]}})
+    (defn pads-in-zone-fn [zone] (count (filter #(= (:title %) "PAD Campaign") (zone (get-corp))))
+      (is (zero? (pads-in-zone-fn :hand)) "No PAD Campaign in hand before playing Reclamation Order")
+      (play-from-hand state :corp "Reclamation Order")
+      (click-card state :corp (first (:discard (get-corp))))
+      (click-prompt state :corp "2")
+      (is (= 2 (pads-in-zone-fn :hand)) "2 PAD Campaign in hand after playing Reclamation Order")
+      (is (= 2 (:click (get-corp))) "Corp spent 2 clicks to play Reclamation Order")
+      (is (= 4 (count (:discard (get-corp)))) "2 cards corresponding to PAD Campaign were taken from Archives")
+      (is (= 1 (pads-in-zone-fn :discard)) "One PAD left in Archives"))))
