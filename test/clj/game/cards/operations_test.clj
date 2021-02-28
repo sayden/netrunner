@@ -4468,3 +4468,13 @@
     (take-credits state :runner)
     (play-from-hand state :corp "Restructure")
     (is (= 15 (:credit (get-corp))))))
+
+(deftest rework
+  (do-game
+    (new-game {:corp {:hand ["Rework" "Priority Requisition"]}})
+    (play-from-hand state :corp "Rework")
+    (click-card state :corp (first (:hand (get-corp))))
+    (is (= 1 (count (:deck (get-corp)))))
+    (is (= "Priority Requisition" (:title (first (:deck (get-corp))))))
+    (is (= "Rework" (:title (first (:discard (get-corp))))))
+    (is (zero? (count (:hand (get-corp)))))))
