@@ -4435,3 +4435,26 @@
     (is (= "Enigma" (:title (get-ice state :hq 0))) "First installed ice is Enigma")
     (is (= "Ice Wall" (:title (get-ice state :hq 1))) "Second installed ice is Ice Wall")))
 
+(deftest restoring-face
+  (do-game
+    (new-game {:corp {:bad-pub 6
+                      :credit 15
+                      :hand    [(qty "Restoring Face" 3) "Akitaro Watanabe" "Anson Rose" "Turtlebacks" "PAD Campaign"]}})
+    (play-from-hand state :corp "Akitaro Watanabe" "New remote")
+    (play-from-hand state :corp "Anson Rose" "New remote")
+    (play-from-hand state :corp "Turtlebacks" "New remote")
+    (take-credits state :runner)
+    (play-from-hand state :corp "PAD Campaign" "New remote")
+    (play-from-hand state :corp "Restoring Face")
+    (click-card state :corp (get-content state :remote4 0))
+    (is (= "Select a Sysop, Executive or Clone to trash" (:msg (get-prompt state :corp))) "Message must stay if you don't one of the expected subtypes")
+    (click-card state :corp (get-content state :remote3 0))
+    (is (= 4 (:base (:bad-publicity (get-corp)))) "2 BP less for Trashing Turtlebacks (Clone)")
+    (play-from-hand state :corp "Restoring Face")
+    (click-card state :corp (get-content state :remote2 0))
+    (is (= 2 (:base (:bad-publicity (get-corp)))) "2 BP less for Trashing Anson Rose (Executive)")
+    (take-credits state :runner)
+    (play-from-hand state :corp "Restoring Face")
+    (click-card state :corp (get-content state :remote1 0))
+    (is (zero? (:base (:bad-publicity (get-corp)))) "2 BP less for Trashing Akitaro Watanabe (SysOps). 0 BP")
+    ))
