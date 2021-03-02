@@ -3663,3 +3663,30 @@
       (click-prompt state :runner "Pay 2 [Credits] to trash") ;; trash Launch Campaign, should trigger wyvern
       (is (= "Sure Gamble" (:title (last (:discard (get-runner)))))
           "Sure Gamble still in Wyvern's discard"))))
+
+(deftest argus-security
+  (testing "take 1 tag when stealing agenda"
+    (do-game
+      (new-game {:corp {:id "Argus Security: Protection Guaranteed"
+                        :hand ["AR-Enhanced Security"]}})
+      (play-from-hand state :corp "AR-Enhanced Security" "New remote")
+      (take-credits state :corp)
+      (is (zero? (:total (:tag (get-runner)))))
+      (run-on state "Server 1")
+      (run-continue state)
+      (click-prompt state :runner "Steal")
+      (click-prompt state :runner "1 tag")
+      (is (= 1 (:total (:tag (get-runner)))))))
+  (testing "2 meat damage when stealing agenda"
+    (do-game
+      (new-game {:corp {:id "Argus Security: Protection Guaranteed"
+                        :hand ["AR-Enhanced Security"]}
+                 :runner {:hand [(qty "Sure Gamble" 2) "Muresh Bodysuit"]}})
+      (play-from-hand state :corp "AR-Enhanced Security" "New remote")
+      (take-credits state :corp)
+      (play-from-hand state :runner "Muresh Bodysuit")
+      (run-on state "Server 1")
+      (run-continue state)
+      (click-prompt state :runner "Steal")
+      (click-prompt state :runner "2 meat damage")
+      (is (= 1 (count (:hand (get-runner)))) "Runner only lost one card because Muresh Bodysuit prevented the second point"))))
