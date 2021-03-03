@@ -3664,7 +3664,7 @@
       (is (= "Sure Gamble" (:title (last (:discard (get-runner)))))
           "Sure Gamble still in Wyvern's discard"))))
 
-(deftest argus-security
+(deftest argus-security-protection-guaranteed
   (testing "take 1 tag when stealing agenda"
     (do-game
       (new-game {:corp {:id "Argus Security: Protection Guaranteed"
@@ -3680,13 +3680,19 @@
   (testing "2 meat damage when stealing agenda"
     (do-game
       (new-game {:corp {:id "Argus Security: Protection Guaranteed"
-                        :hand ["AR-Enhanced Security"]}
-                 :runner {:hand [(qty "Sure Gamble" 2) "Muresh Bodysuit"]}})
+                        :hand [(qty "AR-Enhanced Security" 2)]}
+                 :runner {:hand [(qty "Muresh Bodysuit" 5)]}})
+      (play-from-hand state :corp "AR-Enhanced Security" "New remote")
       (play-from-hand state :corp "AR-Enhanced Security" "New remote")
       (take-credits state :corp)
-      (play-from-hand state :runner "Muresh Bodysuit")
       (run-on state "Server 1")
       (run-continue state)
       (click-prompt state :runner "Steal")
       (click-prompt state :runner "2 meat damage")
-      (is (= 1 (count (:hand (get-runner)))) "Runner only lost one card because Muresh Bodysuit prevented the second point"))))
+      (is (= 3 (count (:hand (get-runner)))) "Runner looses two cards caused by damage")
+      (play-from-hand state :runner "Muresh Bodysuit")      ;;Play to prevent 1 meat damage
+      (run-on state "Server 2")
+      (run-continue state)
+      (click-prompt state :runner "Steal")
+      (click-prompt state :runner "2 meat damage")
+      (is (= 1 (count (:hand (get-runner)))) "Runner only lost one card because Muresh Bodysuit prevented the second meat damage point"))))
